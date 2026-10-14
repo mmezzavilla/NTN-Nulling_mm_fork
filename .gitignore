@@ -16,3 +16,7 @@ __pycache__/
 Thumbs.db
 # 忽略结果文件夹
 ResultPlot/
+
+# Local virtualenv
+sionna_env/
+.superpowers/

@@ -1,0 +1,13 @@
+# STEP 1 beacon experiments. Python 3.12 venv at ~/venvs/sionna_env.
+# macOS 14: Homebrew has no LLVM bottle; libLLVM comes from conda-forge:
+#   micromamba create -p ~/venvs/llvm -c conda-forge libllvm18
+#   export DRJIT_LIBLLVM_PATH=$HOME/venvs/llvm/lib/libLLVM-18.dylib   (appended to the venv activate script)
+drjit==1.3.1
+matplotlib==3.11.2
+mitsuba==3.8.0
+numpy==2.5.4
+pytest==9.1.1
+scipy==1.18.1
+sionna==1.2.2
+sionna-rt==1.2.2
+tensorflow==2.21.0
