@@ -47,7 +47,9 @@ def main():
                               centerBS=True, bs_dist_min=35, bs_dist_max=3000)
         cfg.compute_paths(tx_rows=4, tx_cols=16, tn_rx_rows=1, tn_rx_cols=1, max_depth=3)
         h.append(channels_from_cir(cfg.a_ntn))
-        hf.append(channels_from_cfr(cfg.paths_ntn.cfr(frequencies=freqs, normalize_delays=True,
+        # Absolute delays: Sionna's normalize_delays=True corrupts the response when
+        # invalid paths (tau = -1) are present; a common delay does not change |w^H H(f)|.
+        hf.append(channels_from_cfr(cfg.paths_ntn.cfr(frequencies=freqs, normalize_delays=False,
                                                       out_type="numpy")))
         # The f = 0 subcarrier must match the carrier-only channel up to a common phase.
         assert np.allclose(np.abs(hf[-1][..., N_SC // 2]), np.abs(h[-1]), rtol=1e-3, atol=1e-12)
