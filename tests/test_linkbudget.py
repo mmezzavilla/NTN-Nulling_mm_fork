@@ -48,3 +48,31 @@ def test_t_rule_picks_worst_harmed():
 
 def test_t_rule_bound_value():
     assert t_rule_bound(256., 64, 3, 10 ** -0.6, 1e8) == pytest.approx(1.9568e-3, rel=1e-3)
+
+
+def test_t_required_per_harmed_vsat():
+    from beacon.linkbudget import t_required
+    rate = np.array([[100., 50, 0], [10., 0, 0], [1., 0, 0]])
+    inr = np.array([1., 1., 0.1])
+    assert t_required(rate, inr, 256., 0.25).tolist() == pytest.approx([2.56, 25.6])
+
+
+def test_t_rule_quantile():
+    from beacon.linkbudget import t_rule_quantile
+    rate = np.array([[256.], [128.], [64.], [32.]])
+    inr = np.ones(4)
+    assert t_rule_quantile(rate, inr, 256., 0.25, 0.5) == pytest.approx(3.0)   # median of 1,2,4,8
+
+
+def test_t_rule_raises_on_harmed_vsat_with_zero_beacon_gain():
+    rate = np.array([[0., 0, 0]])
+    with pytest.raises(ValueError):
+        t_rule(rate, np.array([1.0]), 256., 0.25)
+
+
+def test_class_fractions_indexed_by_class_value():
+    from beacon.linkbudget import class_fractions
+    c = np.array([[RED, RED, GREEN, GREY]], dtype=np.int8)
+    f = class_fractions(c, axis=-1)
+    assert f.shape == (1, 3)
+    assert f[0, RED] == 0.5 and f[0, GREEN] == 0.25 and f[0, GREY] == 0.25
