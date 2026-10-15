@@ -1,6 +1,6 @@
 # STEP 1 design: gNB → VSAT beacon detection
 
-Date: 2026-10-14. Status: draft for approval.
+Date: 2026-10-14. Status: approved; amended 2026-10-15 (see Amendments).
 
 ## Intent
 
@@ -188,3 +188,16 @@ as long as it carries 128 bits; OFDM numerology; the number of drops and
 VSATs per drop (paper: 300 NTN-UEs, 100 drops); plotting style; whether to add
 the optional **elevation-fan precoder** (a wide azimuth beam with the 4 rows
 focused near the horizon) as a comparison variant.
+
+## Amendments (2026-10-15, approved by the user after the final review)
+
+- **Wideband evaluation.** The beacon and data occupy 100 MHz, so channel gains are
+  averaged over 64 subcarriers (1.5625 MHz spacing) instead of evaluated at the
+  carrier only: `|wᴴh_s|²` → mean_k `|wᴴH_s(f_k)|²` and `‖h_s‖²` → mean_k `‖H_s(f_k)‖²`.
+  A single carrier-frequency coefficient fades like Rayleigh, which made the
+  "all harmed VSATs" beacon length a tail statistic of narrowband fades.
+  Narrowband results are kept for comparison (`--band narrow`).
+- **Beacon lengths reported.** The maps use T ∈ {20 µs (paper), the analytic
+  bound, the length covering 99 % of harmed VSATs, the length covering all
+  harmed VSATs}. Sanity check 4 (red at the rule length) is evaluated at the
+  analytic bound, where it actually tests the ‖h‖²/N_tx assumption.

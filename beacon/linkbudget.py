@@ -1,6 +1,8 @@
 """Beacon link budget and green/red/grey VSAT classification (pure numpy).
 
-Channels h have shape (n_vsat, n_sect, n_tx); the precoder w has shape (n_tx,).
+Channels h have shape (n_vsat, n_sect, n_tx) (narrowband, at the carrier) or
+(n_vsat, n_sect, n_tx, n_sc) (wideband, per subcarrier); gains are averaged over
+subcarriers. The precoder w has shape (n_tx,).
 Powers are in W, times in s, bandwidths in Hz; SNR/INR values are linear.
 """
 import numpy as np
@@ -17,15 +19,20 @@ def noise_psd_w(nf_db, kt_dbm_hz=-174.0):
     return dbm_to_w(kt_dbm_hz + nf_db)
 
 
+def _wideband(h):
+    return h[..., None] if h.ndim == 3 else h
+
+
 def inr_worst(h, p_w, b_hz, nf_db):
     """Worst-case data INR: every sector's full beam on the VSAT, summed over sectors."""
-    gain = np.sum(np.abs(h) ** 2, axis=(1, 2))
+    gain = np.mean(np.sum(np.abs(_wideband(h)) ** 2, axis=(1, 2)), axis=-1)
     return p_w * gain / (noise_psd_w(nf_db) * b_hz)
 
 
 def beacon_snr(h, w, p_w, t_s, nf_db):
     """Total received beacon energy over N0, per VSAT and sector."""
-    return p_w * t_s * np.abs(h @ w.conj()) ** 2 / noise_psd_w(nf_db)
+    beam = np.einsum("nstk,t->nsk", _wideband(h), w.conj())
+    return p_w * t_s * np.mean(np.abs(beam) ** 2, axis=-1) / noise_psd_w(nf_db)
 
 
 def classify(gamma, inr, gamma_req, inr_th):

@@ -76,3 +76,21 @@ def test_class_fractions_indexed_by_class_value():
     f = class_fractions(c, axis=-1)
     assert f.shape == (1, 3)
     assert f[0, RED] == 0.5 and f[0, GREEN] == 0.25 and f[0, GREY] == 0.25
+
+
+def test_wideband_single_subcarrier_equals_narrowband():
+    rng = np.random.default_rng(0)
+    h = rng.standard_normal((4, 3, 64)) + 1j * rng.standard_normal((4, 3, 64))
+    w = np.full(64, 1 / 8, complex)
+    assert np.allclose(beacon_snr(h[..., None], w, 1., 1e-3, 2.), beacon_snr(h, w, 1., 1e-3, 2.))
+    assert np.allclose(inr_worst(h[..., None], 1., 1e8, 2.), inr_worst(h, 1., 1e8, 2.))
+
+
+def test_wideband_averages_over_subcarriers():
+    # Beam gain 1 on one subcarrier and 0 on the other averages to 0.5.
+    h = np.zeros((1, 1, 64, 2), complex)
+    h[0, 0, 0, 0] = 8.0                      # |h·w*|² = 1 with w = 1/8
+    w = np.full(64, 1 / 8, complex)
+    psd = noise_psd_w(2.)
+    assert beacon_snr(h, w, 1., 1., 2.)[0, 0] == pytest.approx(0.5 / psd)
+    assert inr_worst(h, 1., 1e8, 2.)[0] == pytest.approx(32.0 / (psd * 1e8))   # mean ‖h‖² = 64/2
