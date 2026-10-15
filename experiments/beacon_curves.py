@@ -36,7 +36,7 @@ def main():
                   smoke=args.smoke)
     run_dir = make_run_dir("beacon_curves" + ("_smoke" if args.smoke else ""), params)
 
-    out, req = {"gamma_db": gamma_db}, {}
+    out, psucc = {"gamma_db": gamma_db}, []
     fig, ax = plt.subplots(figsize=(6.4, 4.4))
     for (tag, t_s), ls in zip(t_values.items(), ["-", "--"]):
         t0 = time.time()
@@ -45,22 +45,19 @@ def main():
         print(f"{tag}: {time.time() - t0:.1f} s")
         for k in ("pd", "bler", "psucc"):
             out[f"{k}_{tag}"] = r[k]
+        psucc.append(r["psucc"])
         ax.plot(gamma_db, r["pd"], ls, color="#1f77b4", label=f"P_det, {tag}")
         ax.plot(gamma_db, 1 - r["bler"], ls, color="#ff7f0e", label=f"1-BLER, {tag}")
         ax.plot(gamma_db, r["psucc"], ls, color="#2ca02c", label=f"P_succ, {tag}")
-        try:
-            req[tag] = phy.gamma_req_db(gamma_db, r["psucc"], TARGET)
-            print(f"gamma_req {tag}: {req[tag]:.2f} dB")
-        except ValueError as e:
-            print(f"gamma_req {tag}: {e}")
-
-    if req:
-        out["gamma_req_db"] = max(req.values())
-        ax.axvline(out["gamma_req_db"], color="grey", ls=":", label="γ_req")
-        print(f"gamma_req_db = {out['gamma_req_db']:.2f} dB")
     ax.set_xlabel("Total received beacon energy / N0, γ (dB)")
     ax.set_ylabel("Probability")
     ax.grid(True)
+
+    # Save the raw curves first; gamma_req is written only if every T reaches the target.
+    np.savez(run_dir / "curves.npz", **out)
+    out["gamma_req_db"] = phy.combined_gamma_req_db(gamma_db, psucc, TARGET)
+    print(f"gamma_req_db = {out['gamma_req_db']:.2f} dB (max over T)")
+    ax.axvline(out["gamma_req_db"], color="grey", ls=":", label="γ_req")
     ax.legend(fontsize=8)
     save_figure(fig, run_dir, "curves")
     np.savez(run_dir / "curves.npz", **out)

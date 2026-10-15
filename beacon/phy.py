@@ -10,6 +10,7 @@ are sufficient statistics, so they are drawn directly from their exact
 distributions instead of generating every sample.
 """
 import functools
+import warnings
 
 import numpy as np
 
@@ -103,6 +104,13 @@ def gamma_req_db(gamma_db, psucc, target=0.99):
         raise ValueError(f"success probability never reaches {target}")
     i = above[0]
     if i == 0:
+        warnings.warn(f"success already ≥ {target} at the first grid point; "
+                      f"gamma_req clamped to {gamma_db[0]} dB (extend the grid down)")
         return float(gamma_db[0])
     g0, g1, p0, p1 = gamma_db[i - 1], gamma_db[i], psucc[i - 1], psucc[i]
     return float(g0 + (target - p0) * (g1 - g0) / (p1 - p0))
+
+
+def combined_gamma_req_db(gamma_db, psucc_list, target=0.99):
+    """Conservative gamma_req over several beacon lengths: the max; raises if any is unreached."""
+    return max(gamma_req_db(gamma_db, p, target) for p in psucc_list)

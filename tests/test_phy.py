@@ -33,3 +33,21 @@ def test_gamma_req_interpolates():
 def test_gamma_req_unreached_raises():
     with pytest.raises(ValueError):
         gamma_req_db(np.array([20., 21]), np.array([0.5, 0.9]))
+
+
+def test_combined_gamma_req_takes_max():
+    from beacon.phy import combined_gamma_req_db
+    g = np.array([20., 21, 22])
+    assert combined_gamma_req_db(g, [np.array([0.5, 0.98, 1.0]), np.array([0.99, 1, 1])]) == pytest.approx(21.5)
+
+
+def test_combined_gamma_req_raises_if_any_unreached():
+    from beacon.phy import combined_gamma_req_db
+    g = np.array([20., 21])
+    with pytest.raises(ValueError):
+        combined_gamma_req_db(g, [np.array([0.99, 1.0]), np.array([0.5, 0.9])])
+
+
+def test_gamma_req_warns_when_clamped_at_grid_start():
+    with pytest.warns(UserWarning):
+        assert gamma_req_db(np.array([20., 21]), np.array([0.995, 1.0])) == 20.0
