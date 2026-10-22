@@ -1,0 +1,266 @@
+<title>Beacon Reach at the VSAT</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: single reading column (~68ch) with full-width figure plates; summary first, detail after. */
+:root {
+  --bg: #f7f8fa; --surface: #ffffff; --fg: #1d232b; --muted: #5d6672; --rule: #dde1e6;
+  --accent: #1d5f8a; --green: #2e7d32; --red: #c62828; --grey: #8a9097; --code-bg: #eef1f4;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans: "Source Sans 3", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #14181d; --surface: #1c2128; --fg: #e3e7ec; --muted: #9aa3ad; --rule: #2e353e;
+  --accent: #7fb6dc; --green: #6cc070; --red: #ef6b6b; --grey: #9aa1a8; --code-bg: #232a32; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #14181d; --surface: #1c2128; --fg: #e3e7ec; --muted: #9aa3ad; --rule: #2e353e;
+  --accent: #7fb6dc; --green: #6cc070; --red: #ef6b6b; --grey: #9aa1a8; --code-bg: #232a32; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font: 17px/1.6 var(--sans); }
+.wrap { max-width: 860px; margin: 0 auto; padding-block: 48px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.prose { max-width: 68ch; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; line-height: 1.2; }
+h1 { font-size: 2.3rem; margin: 6px 0 10px; }
+h2 { font-size: 1.55rem; margin: 56px 0 12px; padding-top: 18px; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.15rem; margin: 30px 0 6px; }
+p { margin: 0 0 14px; }
+.eyebrow { font: 600 0.78rem var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.meta { color: var(--muted); font-size: 0.92rem; }
+.meta code { font-size: 0.85rem; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+a { color: var(--accent); }
+.lede { font-size: 1.12rem; }
+
+.findings { display: grid; gap: 12px; margin: 28px 0 8px; padding: 0; list-style: none; }
+.findings li { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 18px;
+  display: grid; grid-template-columns: 7.5rem 1fr; gap: 16px; align-items: baseline; }
+.findings .num { font: 600 1.5rem var(--serif); color: var(--accent); font-variant-numeric: tabular-nums; }
+.findings .num.red { color: var(--red); }
+.findings li > div { min-width: 0; }
+@media (max-width: 560px) { .findings li { grid-template-columns: 1fr; gap: 2px; } }
+
+figure { margin: 26px 0 30px; }
+.plate { background: #ffffff; border: 1px solid var(--rule); border-radius: 8px; padding: 10px; }
+.plate img { display: block; width: 100%; height: auto; }
+figcaption { color: var(--muted); font-size: 0.93rem; margin-top: 10px; max-width: 75ch; }
+figcaption b { color: var(--fg); }
+
+.eq { font-family: var(--mono); font-size: 0.92rem; background: var(--surface); border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent); padding: 10px 14px; margin: 14px 0 18px; overflow-x: auto; white-space: pre; }
+
+.tbl { overflow-x: auto; margin: 16px 0 24px; }
+table { border-collapse: collapse; font-size: 0.93rem; font-variant-numeric: tabular-nums; min-width: 520px; width: 100%; }
+th, td { text-align: left; padding: 7px 12px 7px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+td.n { text-align: right; font-family: var(--mono); font-size: 0.86rem; }
+th.n { text-align: right; }
+.r { color: var(--red); font-weight: 600; }
+.g { color: var(--green); font-weight: 600; }
+.pass { font: 600 0.75rem var(--mono); color: var(--green); border: 1px solid currentColor; border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+.note { font: 600 0.75rem var(--mono); color: var(--muted); border: 1px solid currentColor; border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+.legend-dot { display: inline-block; width: 0.7em; height: 0.7em; border-radius: 50%; vertical-align: 0.05em; margin-right: 4px; }
+
+ol.steps, ul.plain { padding-left: 1.3em; }
+ol.steps li, ul.plain li { margin-bottom: 8px; }
+.next { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 16px; }
+.next section { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 18px; min-width: 0; }
+.next h3 { margin: 0 0 6px; font-size: 1.02rem; }
+.next p, .next li { font-size: 0.95rem; }
+.next ul { padding-left: 1.1em; margin: 0; }
+.update { margin-top: 36px; padding: 6px 0 4px; }
+.update-h { border-top: 0; margin-top: 4px; padding-top: 0; }
+.tag { font: 600 0.7rem var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+</style>
+
+<div class="wrap">
+<header class="prose">
+  <div class="eyebrow">Thesis · STEP 1 progress report</div>
+  <h1>Can a gNB beacon reach every VSAT it could harm?</h1>
+  <p class="meta">15 Oct 2026, updated 22 Oct 2026 · branch <code>step1-beacon-detection</code> @ <code>27900a1b</code> · Boulder scene, 10 GHz, 100 MHz · 20 drops × 300 VSATs</p>
+  <p class="lede">The thesis authenticates the TN–NTN nulling handshake. The gNB broadcasts a beacon carrying a random nonce, each VSAT that hears it replies with a ZKP-authenticated response, and the gNB nulls only toward authenticated VSATs. A VSAT that misses the beacon never replies and is never protected. STEP 1 asks how long that beacon must be so that every VSAT the gNB could harm decodes it.</p>
+</header>
+
+<ul class="findings">
+  <li><div class="num red">15–18 %</div><div>of all VSATs are <b>harmed but miss</b> a beacon that fits in the paper's 20 µs preamble. That is 39–64 % of the harmed VSATs, at every power level.</div></li>
+  <li><div class="num">Power ✕</div><div>Raising TX power from 30 to 45 dBm does not fix it. Beacon SNR and data interference scale together, so the number of missed-but-harmed VSATs barely moves.</div></li>
+  <li><div class="num">2 ms</div><div>The analytic length bound cuts the missed-but-harmed share to about <b>1 %</b> of all VSATs; 10.7 ms cuts it to <b>0.2–0.3 %</b>. Covering every one of the 6,000 placements takes 202 ms.</div></li>
+  <li><div class="num">−27 dB</div><div>The long tail comes from <b>dips in the quasi-omni beacon pattern</b>, not from noise or frequency fading. Wideband and carrier-only channels give the same tail.</div></li>
+</ul>
+
+<section class="update">
+  <div class="eyebrow">Update · 22 Oct 2026</div>
+  <h2 class="update-h">Cycling four beacon patterns closes the tail: 202 ms → 3.6 ms</h2>
+  <div class="prose">
+  <p>The 15 Oct results traced the long tail to dips in the quasi-omni pattern (section 4.5). The fix tested here: send the beacon in K equal segments, each with the same Zadoff-Chu pattern shifted by half a DFT bin, so the dips of one pattern fall where the others are strong. Total energy and airtime are unchanged. Each segment carries its own preamble, so the receiver pays a small non-coherent combining cost, which the link-level simulation measures.</p>
+  </div>
+  <figure><div class="plate"><img src="fig6_cycling_treq.png" alt="Required beacon length tail for K = 1, 2 and 4 precoders at three powers"></div>
+  <figcaption><b>Figure 6.</b> Share of harmed VSATs still missed vs beacon length, for K = 1 (the 15 Oct design), 2 and 4 cycled patterns. Dotted lines: analytic bound. With K = 4 the tail drops straight down just past the bound at every power.</figcaption></figure>
+  <div class="tbl"><table>
+  <thead><tr><th>Patterns K</th><th class="n">γ_req</th><th class="n">Bound</th><th class="n">99 % of harmed<br>30 / 40 / 45 dBm</th><th class="n">All harmed<br>30 / 40 / 45 dBm</th><th class="n">Red at bound<br>(all VSATs)</th></tr></thead>
+  <tbody>
+  <tr><td>1 (15 Oct design)</td><td class="n">24.32 dB</td><td class="n">2.07 ms</td><td class="n">10.7 / 5.8 / 4.4 ms</td><td class="n r">136 / 202 / 64 ms</td><td class="n">0.9–1.1 %</td></tr>
+  <tr><td>2 (azimuth shift only)</td><td class="n">24.35 dB</td><td class="n">2.08 ms</td><td class="n">6.9 / 4.5 / 4.0 ms</td><td class="n r">118 / 360 / 114 ms</td><td class="n">0.7–0.8 %</td></tr>
+  <tr><td><b>4 (azimuth × elevation)</b></td><td class="n">24.45 dB</td><td class="n">2.13 ms</td><td class="n g">1.5 / 1.6 / 1.2 ms</td><td class="n g">3.2 / 3.6 / 3.4 ms</td><td class="n g">0.10–0.15 %</td></tr>
+  </tbody></table></div>
+  <figure><div class="plate"><img src="fig7_cycling_ripple.png" alt="CDF of best-sector beacon gain relative to the design assumption for K = 1, 2, 4"></div>
+  <figcaption><b>Figure 7.</b> Pattern loss ρ over harmed VSATs. K = 4 lifts the worst case from −27.5 dB to −7.3 dB (1 % point: −19.3 → −6.9 dB). K = 2 barely helps.</figcaption></figure>
+  <div class="prose">
+  <h3>What this shows</h3>
+  <ul class="plain">
+    <li><b>The diagnosis was right.</b> Removing the pattern dips removes the tail. With K = 4, every one of the 6,000 placements decodes within 3.6 ms, a 56× shorter beacon than before, and the 99 % point now sits <em>below</em> the analytic bound.</li>
+    <li><b>The cost is negligible.</b> Four segments with their own preambles need 0.13 dB more energy than one (24.45 vs 24.32 dB). Two segments cost 0.03 dB.</li>
+    <li><b>Both axes need filling.</b> K = 2 shifts only along the 16-element (azimuth) axis. The 4-element elevation axis has the widest gaps between DFT beams, and its dips remain, so the tail stays. K = 4 covers both axes.</li>
+    <li><b>The tail is now bounded, not just short.</b> From T_req/T_bound = (INR_th/INR)/(3ρ), the worst VSAT can need at most 1/(3ρ_min) ≈ 1.8 × the bound, which is 3.8 ms with ρ_min = −7.3 dB. With K = 1 there was no such ceiling, and the "all harmed" length kept growing with every new drop.</li>
+    <li><b>Airtime.</b> A 3.6 ms beacon on 3 time-multiplexed sectors is about 11 ms per beacon period: 1.1 % of airtime at one beacon per second.</li>
+  </ul>
+  <p class="meta">Runs on the lab machine: channels <code>results/2026-10-22_beacon_channels</code> (same seeds as 15 Oct; K = 1 reproduces the earlier fractions within 0.2 percentage points), link-level <code>2026-10-22_beacon_curves_{2,4}seg</code>, comparison <code>2026-10-22_precoder_cycling</code>, maps <code>2026-10-22_beacon_maps_wideband_4prec</code>. Sanity checks pass; 39/39 unit tests.</p>
+  </div>
+</section>
+
+<h2>1 · The problem, flipped</h2>
+<div class="prose">
+<p>In the baseline paper (Jia et al.) the VSAT transmits and the gNB detects it with 64 antennas. Here the direction is reversed: the gNB transmits a beacon and each single-antenna VSAT must detect it and decode the 128-bit nonce. Two facts shape the problem.</p>
+<ul class="plain">
+  <li><b>The beacon cannot be beamformed.</b> The gNB does not know where the VSATs are, so it sends the beacon quasi-omni from all 64 elements. A VSAT receives roughly the single-element gain, <span class="mono">‖h‖²/N_tx</span>, while a data beam aimed at it delivers up to N_tx = 64 times more (18 dB).</li>
+  <li><b>Beacon and data share the same power P.</b> Both the beacon SNR and the interference a VSAT suffers scale with P. Power therefore changes how many VSATs are at risk, but not whether the at-risk ones hear the beacon. Only the beacon length T, meaning its total energy, changes that.</li>
+</ul>
+
+<h3>Success criterion</h3>
+<p>Every VSAT is coloured by comparing two quantities.</p>
+<div class="eq">harmed   :  INR_worst = Σ_s P·‖h_s‖² / (kT·NF·B)  ≥  −6 dB      (all 3 sector beams on the VSAT)
+decoded  :  γ_s = P·T·|wᴴh_s|² / (kT·NF)  ≥  γ_req   for at least one sector s</div>
+<p><span class="legend-dot" style="background:var(--green)"></span><b>green</b> = decoded the nonce from at least one sector;
+<span class="legend-dot" style="background:var(--red)"></span><b>red</b> = harmed and decoded nothing (the failure we want to remove);
+<span class="legend-dot" style="background:var(--grey)"></span><b>grey</b> = missed but harmless. "Decoded" means detected <em>and</em> nonce correct, not just detected. "Harmed" is a deliberately conservative worst case: every sector's full beam pointed at the VSAT at once, so the result does not depend on which TN-UE happens to be served.</p>
+
+<p>Setting the two conditions against each other gives a closed-form rule. If the beacon pattern gave exactly <span class="mono">‖h_s‖²/N_tx</span>, red dots vanish once</p>
+<div class="eq">T ≥ T_bound = 3 · γ_req · N_tx / (INR_th · B)  =  2.07 ms</div>
+<p>The factor 3 covers harm summed over three sectors when the VSAT can decode only one. The paper's 20 µs preamble is about 100 times shorter.</p>
+</div>
+
+<h2>2 · What was built</h2>
+<div class="prose">
+<p>The work splits into a link-level layer, run once, and a system layer evaluated per VSAT over ray-traced channels. All code lives in <code>beacon/</code> (shared modules) and <code>experiments/</code> (scripts). Every run writes <code>params.json</code> with its git hash to <code>results/</code>.</p>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Piece</th><th>What it does</th><th>Key choices</th></tr></thead>
+<tbody>
+<tr><td><b>Layer A</b><br><code>beacon/phy.py</code><br><code>beacon_curves.py</code></td><td>Monte Carlo of the beacon over AWGN with an unknown phase: P_det, nonce BLER and P_succ vs total received energy γ = E<sub>s,tot</sub>/N0. Gives γ_req.</td><td>25 % known preamble + 128-bit nonce, 5G LDPC (512,128), QPSK, repeated to fill T. Energy detector at P_FA = 10⁻⁸ per timing hypothesis. Channel phase estimated from the preamble. 5,000 trials per point.</td></tr>
+<tr><td><b>Precoder</b><br><code>beacon/precoder.py</code></td><td>Quasi-omni beacon weights for the 4×16 array.</td><td>2D Zadoff-Chu (Kronecker of length-4 and length-16 ZC). Constant modulus, so all 64 PAs run at full power, and flat on the DFT beam grid.</td></tr>
+<tr><td><b>Channels</b><br><code>beacon_channels.py</code></td><td>Sionna RT on the Boulder scene: 1 gNB, 3 sectors × 4×16 URA, VSAT dish pointed at the satellite.</td><td>Paper deployment (80 % rooftop, sat. elevation 25–90°, 500 km). 20 drops × 300 VSATs, max depth 3. Channels at the carrier <em>and</em> on 64 subcarriers across 100 MHz.</td></tr>
+<tr><td><b>Layer B</b><br><code>beacon/linkbudget.py</code><br><code>beacon_maps.py</code></td><td>Per VSAT, sector, power and length: beacon γ, worst-case INR, colour. Searches the beacon lengths that clear 99 % and 100 % of harmed VSATs.</td><td>P ∈ {30, 40, 45} dBm per sector. Gains averaged over the 64 subcarriers (wideband). Sectors send their beacons on orthogonal time slots.</td></tr>
+</tbody></table></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Parameter</th><th class="n">Value</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>Carrier, bandwidth</td><td class="n">10 GHz, 100 MHz</td><td>Paper, Table I</td></tr>
+<tr><td>gNB array per sector</td><td class="n">4 × 16 = 64</td><td>Paper</td></tr>
+<tr><td>VSAT noise figure</td><td class="n">2 dB</td><td>Table I (notebook uses 3 dB; both recorded)</td></tr>
+<tr><td>Harm threshold INR_th</td><td class="n">−6 dB</td><td>Paper</td></tr>
+<tr><td>False-alarm target</td><td class="n">10⁻⁸ / hypothesis</td><td>Paper; one hypothesis per sample offset (≈ 1 false alarm/s)</td></tr>
+<tr><td>Nonce</td><td class="n">128 bit</td><td>Design choice</td></tr>
+<tr><td>Success target</td><td class="n">P_succ ≥ 0.99</td><td>Design choice</td></tr>
+</tbody></table></div>
+
+<h2>3 · Is the pipeline trustworthy?</h2>
+<div class="prose"><p>Before any map was read, the checks required by the project were run. They all pass.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Check</th><th>Result</th><th></th></tr></thead>
+<tbody>
+<tr><td>Single LoS link, dish main lobe, vs hand budget (FSPL + element + dish gain)</td><td class="mono">−60.61 vs −60.60 dB</td><td><span class="pass">PASS</span></td></tr>
+<tr><td>Single LoS link, dish 30° off boresight (sidelobe, as when tracking a satellite)</td><td class="mono">−104.55 vs −104.54 dB</td><td><span class="pass">PASS</span></td></tr>
+<tr><td>Worst-case INR at 30 dBm, main lobe / sidelobe, vs hand budget</td><td class="mono">Δ = −0.01 dB both</td><td><span class="pass">PASS</span></td></tr>
+<tr><td>Measured false-alarm rate vs target (2 M noise-only trials; 10⁻⁸ itself is too rare to measure, so the same threshold formula is checked at larger targets)</td><td class="mono">0.0099 / 0.00098 / 0.000106 at 10⁻² / 10⁻³ / 10⁻⁴</td><td><span class="pass">PASS</span></td></tr>
+<tr><td>Green fraction does not drop as power rises (every T)</td><td class="mono">monotone</td><td><span class="pass">PASS</span></td></tr>
+<tr><td>Unit tests (link budget, classification, PHY edge cases, I/O)</td><td class="mono">34 / 34</td><td><span class="pass">PASS</span></td></tr>
+<tr><td>Red at the analytic bound (tests the ‖h‖²/N_tx assumption)</td><td class="mono">≈ 1 % of VSATs</td><td><span class="note">REPORTED</span></td></tr>
+</tbody></table></div>
+
+<h2>4 · Results</h2>
+
+<h3>4.1 Decoding the nonce, not detecting the beacon, sets the energy budget</h3>
+<figure><div class="plate"><img src="fig1_linklevel.png" alt="Detection and success probability versus total received beacon energy"></div>
+<figcaption><b>Figure 1.</b> Layer A link-level curves. Detection alone reaches 99 % around 21.5 dB; detection plus a correct 128-bit nonce needs <b>γ_req = 24.3 dB</b>. The 20 µs and 1 ms beacons give the same success curve, because repetition with coherent combining wastes no energy.</figcaption></figure>
+<div class="prose">
+<p>The nonce costs about 3 dB more than detection at the 99 % point. In energy-per-bit terms, γ_req ≈ 270 spread over 128 bits is about 2.1 per information bit (3.2 dB Eb/N0, preamble included). That is a sensible operating point for a rate-1/4 LDPC code. Because the success curve depends only on total energy and not on T, one number, γ_req, carries the whole link layer into the maps.</p>
+</div>
+
+<h3>4.2 Maps: the 20 µs beacon leaves many harmed VSATs unprotected</h3>
+<figure><div class="plate"><img src="fig2_maps.png" alt="Grid of maps of green, red and grey VSATs for three powers and three beacon lengths"></div>
+<figcaption><b>Figure 2.</b> One drop (300 VSATs, gNB at ▲). Rows: TX power per sector. Columns: beacon length. At 20 µs the red dots are spread across the whole area, near and far. At 2.07 ms only a handful remain, and at 10.7 ms almost none.</figcaption></figure>
+<div class="prose">
+<p>Two patterns stand out. Going down a column (more power), green grows but red does not shrink, because new VSATs enter the harmed set as fast as old ones become audible. Going right along a row (longer beacon), red turns green. At 45 dBm and 10.7 ms the drop has no red at all. The grey majority are mostly VSATs with no ray-traced path to the gNB (39 % of placements) or with weak sidelobe coupling.</p>
+</div>
+
+<h3>4.3 Aggregate over 6,000 placements</h3>
+<figure><div class="plate"><img src="fig3_fractions.png" alt="Stacked bars of decoded, harmed-missed and harmless-missed share per power and beacon length"></div>
+<figcaption><b>Figure 3.</b> Share of VSATs by class, pooled over 20 drops. The red label is the missed-but-harmed share.</figcaption></figure>
+<div class="tbl"><table>
+<thead><tr><th>Beacon length T</th><th class="n">30 dBm</th><th class="n">40 dBm</th><th class="n">45 dBm</th></tr></thead>
+<tbody>
+<tr><td>Harmed (worst case), any T</td><td class="n">27.7 %</td><td class="n">35.9 %</td><td class="n">40.9 %</td></tr>
+<tr><td>20 µs (paper preamble)</td><td class="n r">17.8 %</td><td class="n r">15.4 %</td><td class="n r">16.0 %</td></tr>
+<tr><td>2.07 ms (analytic bound)</td><td class="n r">1.0 %</td><td class="n r">1.1 %</td><td class="n r">0.9 %</td></tr>
+<tr><td>10.7 ms (99 % of harmed)</td><td class="n r">0.3 %</td><td class="n r">0.2 %</td><td class="n r">0.2 %</td></tr>
+<tr><td>202 ms (all harmed)</td><td class="n g">0</td><td class="n g">0</td><td class="n g">0</td></tr>
+</tbody></table></div>
+<div class="prose">
+<p>The harmed share grows with power, from 28 % to 41 %. The missed-but-harmed share at 20 µs stays at 15–18 % regardless. This is the expected result: <b>power moves the boundary of the at-risk region, length decides whether the beacon covers it.</b></p>
+</div>
+
+<h3>4.4 How long must the beacon be?</h3>
+<figure><div class="plate"><img src="fig4_treq_ccdf.png" alt="Complementary CDF of required beacon length over harmed VSATs"></div>
+<figcaption><b>Figure 4.</b> For each harmed VSAT, the beacon length at which its best sector reaches γ_req. The curve gives the share of harmed VSATs still missed at that length. Solid: wideband (64 subcarriers). Dashed: carrier only.</figcaption></figure>
+<div class="prose">
+<p>The median harmed VSAT needs only 6–50 µs, so the bulk is easy. The trouble is the tail. Between the analytic bound (2 ms) and full coverage (≈ 200 ms) the missed share falls only from about 3 % to zero, and the last 1 % alone costs a factor of 20 in length. The wideband and carrier-only curves overlap. Averaging over 100 MHz removes frequency fading but does not change the tail, so fading is not its cause.</p>
+</div>
+
+<h3>4.5 Why the tail exists: pattern dips in the quasi-omni beacon</h3>
+<figure><div class="plate"><img src="fig5_ripple.png" alt="CDF of best-sector beacon gain relative to the design assumption"></div>
+<figcaption><b>Figure 5.</b> Ratio ρ of the beacon gain actually received from the best sector, |wᴴh_s|², to the design assumption Σ<sub>s</sub>‖h_s‖²/N_tx. Median −1 dB, but 1 % of harmed VSATs sit below −19 dB and the worst at −27.5 dB.</figcaption></figure>
+<div class="prose">
+<p>The required length of each harmed VSAT, relative to the bound, factors into two terms:</p>
+<div class="eq">T_req / T_bound  =  (INR_th / INR_worst) · 1 / (3ρ)</div>
+<p>The first term is the <b>interference margin</b>. Most harmed VSATs are far above threshold (median INR +7 dB at 30 dBm, +16 dB at 45 dBm), and every dB of excess harm is a dB of excess beacon SNR, so they decode early. The second term is the <b>pattern loss</b>. A VSAT exceeds the bound only when it sits near the harm threshold <em>and</em> in a dip of the ZC quasi-omni pattern. The ZC precoder is flat on the 64 DFT beam directions but not between them, and with sparse multipath (a few strong rays) the VSAT sees that ripple directly. The red that remains at the bound is therefore a property of the precoder, and the precoder is something we can change.</p>
+</div>
+
+<h2>5 · Early conclusions</h2>
+<ol class="steps prose">
+  <li><b>The authenticated-beacon approach is viable at the PHY layer, with a beacon of a few milliseconds.</b> A 2 ms beacon per sector protects 96–98 % of the harmed VSATs, and 10.7 ms protects 99 %. With one beacon per second on three time-multiplexed sectors, that is 0.6 % to 3.2 % of gNB airtime.</li>
+  <li><b>A beacon the length of the paper's 20 µs preamble is not enough.</b> It leaves 15–18 % of all VSATs harmed and unprotected. A spoof-resistant beacon carries a 128-bit nonce, and decoding it needs about 3 dB more energy than detection alone.</li>
+  <li><b>Length is the design lever, not power.</b> The missed-but-harmed share is flat across 30–45 dBm, as the scaling argument predicts. Raising power only grows the set of VSATs that need protecting.</li>
+  <li><b>The analytic bound <span class="mono">T = 3γ_req·N_tx / (INR_th·B)</span> is a good engineering rule.</b> It predicts the 2 ms knee from three numbers. In the ray-traced scene it leaves about 1 % of all VSATs (2–4 % of the harmed ones) unprotected.</li>
+  <li><b>Full coverage is limited by the quasi-omni pattern, not by the link.</b> Closing the last 1 % with length alone costs 100× airtime. <em>Update 22 Oct:</em> cycling 4 half-bin-shifted patterns closes it, with full coverage at 3.6 ms (see the update at the top).</li>
+</ol>
+
+<div class="prose">
+<h3>Caveats to keep in mind</h3>
+<ul class="plain">
+  <li><b>Harm is worst case.</b> All three sector beams aim at each VSAT simultaneously. Real data beams follow TN-UEs, so the true harmed set is smaller and the red shares above are upper bounds.</li>
+  <li><b>No-path VSATs count as harmless.</b> 39 % of placements receive no ray within depth 3 and are grey by construction. Diffraction or deeper reflections could move some of them into the harmed set.</li>
+  <li><b>The link level is idealised.</b> AWGN with perfect timing and frequency sync. The wideband gain average treats the frequency-selective channel as if coding captured its mean energy, which is slightly optimistic for the deepest-faded VSATs.</li>
+  <li><b>Statistics.</b> 20 drops versus the paper's 100. The 99 % point is stable, but the "all harmed" length is the maximum over 6,000 samples and will grow with more drops.</li>
+</ul>
+</div>
+
+<h2>6 · Next steps</h2>
+<div class="next">
+  <section><div class="tag">Done · 22 Oct</div><h3>Fill the pattern dips</h3>
+    <p>Four half-bin-shifted ZC patterns cycled over the beacon: full coverage at 3.6 ms instead of 202 ms, for 0.13 dB extra energy. See the update at the top. Still open: segments with unequal gains in the link-level model, and more drops to confirm the 1.8× ceiling.</p></section>
+  <section><div class="tag">Close STEP 1</div><h3>Realistic harm</h3>
+    <p>Replace the worst-case beam with the actual nulling-BF beams toward served TN-UEs (from <code>Lambda_CDF_det</code>). Report red under the CDF of real interference, not only the bound.</p></section>
+  <section><div class="tag">Close STEP 1</div><h3>Robustness</h3>
+    <ul><li>100 drops, as in the paper</li><li>NF 3 dB sensitivity</li><li>diffraction / depth 4 for no-path VSATs</li><li>timing and CFO search in Layer A</li></ul></section>
+  <section><div class="tag">STEP 2</div><h3>VSAT → gNB proof response</h3>
+    <p>Choose the uplink model (reciprocal ray-traced channel, VSAT transmitting through its sidelobe toward the gNB, 64-antenna receive gain). At the same energy per bit as the nonce, a 400 B proof needs about 25× the nonce energy, 5 KB about 320× and 1 MB about 65,000× (+48 dB). The large proof is the open question.</p></section>
+  <section><div class="tag">STEP 3</div><h3>Capacity vs proof size</h3>
+    <p>Combine beacon airtime (this step) with response airtime (STEP 2) into a TN and VSAT-uplink capacity loss per proof system, and set it against verification compute.</p></section>
+</div>
+
+<p class="meta" style="margin-top:48px">Reproduce: <code>python -m experiments.step1_report_figs --channels results/2026-10-15_beacon_channels --channels-narrow results/2026-10-15_beacon_channels --curves results/2026-10-14_beacon_curves --maps results/2026-10-15_beacon_maps_wideband</code>. Figures as PDF/PNG and <code>stats.json</code> are in <code>results/2026-10-15_step1_report/</code>.</p>
+</div>

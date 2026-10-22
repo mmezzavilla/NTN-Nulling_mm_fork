@@ -1,0 +1,23 @@
+{
+  "channels": "results/2026-10-22_beacon_channels",
+  "curves": {
+    "1": "results/2026-10-14_beacon_curves",
+    "2": "results/2026-10-22_beacon_curves_2seg",
+    "4": "results/2026-10-22_beacon_curves_4seg"
+  },
+  "gamma_req_db": {
+    "1": 24.317073170731707,
+    "2": 24.348360655737707,
+    "4": 24.454301075268816
+  },
+  "b_hz": 100000000.0,
+  "nf_db": 2.0,
+  "inr_th_db": -6.0,
+  "p_dbm": [
+    30.0,
+    40.0,
+    45.0
+  ],
+  "git_commit": "27900a1baf1a4c0692fd396f12b0801f487e55cd",
+  "git_dirty": false
+}

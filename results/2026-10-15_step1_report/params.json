@@ -1,0 +1,9 @@
+{
+  "channels": "results/2026-10-15_beacon_channels",
+  "channels_narrow": "results/2026-10-15_beacon_channels",
+  "curves": "results/2026-10-14_beacon_curves",
+  "maps": "results/2026-10-15_beacon_maps_wideband",
+  "gamma_req_db": 24.317073170731707,
+  "git_commit": "9322100abfe151a6e82ad9c25e5929b1213eb2cb",
+  "git_dirty": false
+}
