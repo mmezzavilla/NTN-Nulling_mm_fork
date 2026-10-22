@@ -2,7 +2,7 @@
 
 Channels h have shape (n_vsat, n_sect, n_tx) (narrowband, at the carrier) or
 (n_vsat, n_sect, n_tx, n_sc) (wideband, per subcarrier); gains are averaged over
-subcarriers. The precoder w has shape (n_tx,).
+subcarriers. The precoder w has shape (n_tx,), or (k, n_tx) for a cycled set.
 Powers are in W, times in s, bandwidths in Hz; SNR/INR values are linear.
 """
 import numpy as np
@@ -30,9 +30,14 @@ def inr_worst(h, p_w, b_hz, nf_db):
 
 
 def beacon_snr(h, w, p_w, t_s, nf_db):
-    """Total received beacon energy over N0, per VSAT and sector."""
-    beam = np.einsum("nstk,t->nsk", _wideband(h), w.conj())
-    return p_w * t_s * np.mean(np.abs(beam) ** 2, axis=-1) / noise_psd_w(nf_db)
+    """Total received beacon energy over N0, per VSAT and sector.
+
+    w is one precoder (n_tx,) or a set (k, n_tx) cycled with equal time each, so the
+    gain is averaged over the set.
+    """
+    w = np.atleast_2d(w)
+    beam = np.einsum("nstk,pt->npsk", _wideband(h), w.conj())
+    return p_w * t_s * np.mean(np.abs(beam) ** 2, axis=(1, -1)) / noise_psd_w(nf_db)
 
 
 def classify(gamma, inr, gamma_req, inr_th):

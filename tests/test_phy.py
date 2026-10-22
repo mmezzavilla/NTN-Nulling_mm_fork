@@ -51,3 +51,14 @@ def test_combined_gamma_req_raises_if_any_unreached():
 def test_gamma_req_warns_when_clamped_at_grid_start():
     with pytest.warns(UserWarning):
         assert gamma_req_db(np.array([20., 21]), np.array([0.995, 1.0])) == 20.0
+
+
+def test_segmented_threshold_and_pfa():
+    assert detection_threshold(1e-8, 1) == pytest.approx(18.4207, rel=1e-4)
+    assert detection_threshold(1e-2, 4) > detection_threshold(1e-2, 1)
+    assert measure_pfa(20e-6, 1e8, 1e-2, 20000, seed=2, n_seg=4) == pytest.approx(1e-2, abs=3e-3)
+
+
+def test_segmented_beacon_high_and_low_snr():
+    assert simulate_beacon(np.array([40.0]), 20e-6, 1e8, 200, n_seg=4)["psucc"][0] == 1.0
+    assert simulate_beacon(np.array([0.0]), 20e-6, 1e8, 200, n_seg=4)["psucc"][0] < 0.05

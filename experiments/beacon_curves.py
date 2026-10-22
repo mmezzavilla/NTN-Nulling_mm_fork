@@ -22,6 +22,8 @@ TARGET = 0.99
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true")
+    ap.add_argument("--n-seg", type=int, default=1,
+                    help="beacon segments, one per cycled precoder, each with its own preamble")
     args = ap.parse_args()
 
     if args.smoke:
@@ -33,15 +35,16 @@ def main():
     params = dict(b_hz=B_HZ, pfa=PFA, preamble_frac=PREAMBLE_FRAC, target=TARGET,
                   k_nonce=phy.K_NONCE, n_code=phy.N_CODE, code="5G LDPC BP 20 it, QPSK",
                   n_trials=n_trials, gamma_db=gamma_db.tolist(), t_values=t_values,
-                  smoke=args.smoke)
-    run_dir = make_run_dir("beacon_curves" + ("_smoke" if args.smoke else ""), params)
+                  n_seg=args.n_seg, smoke=args.smoke)
+    seg = f"_{args.n_seg}seg" if args.n_seg > 1 else ""
+    run_dir = make_run_dir("beacon_curves" + seg + ("_smoke" if args.smoke else ""), params)
 
     out, psucc = {"gamma_db": gamma_db}, []
     fig, ax = plt.subplots(figsize=(6.4, 4.4))
     for (tag, t_s), ls in zip(t_values.items(), ["-", "--"]):
         t0 = time.time()
         r = phy.simulate_beacon(gamma_db, t_s, B_HZ, n_trials, PFA, seed=0,
-                                preamble_frac=PREAMBLE_FRAC)
+                                preamble_frac=PREAMBLE_FRAC, n_seg=args.n_seg)
         print(f"{tag}: {time.time() - t0:.1f} s")
         for k in ("pd", "bler", "psucc"):
             out[f"{k}_{tag}"] = r[k]

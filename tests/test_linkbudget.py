@@ -94,3 +94,12 @@ def test_wideband_averages_over_subcarriers():
     psd = noise_psd_w(2.)
     assert beacon_snr(h, w, 1., 1., 2.)[0, 0] == pytest.approx(0.5 / psd)
     assert inr_worst(h, 1., 1e8, 2.)[0] == pytest.approx(32.0 / (psd * 1e8))   # mean ‖h‖² = 64/2
+
+
+def test_beacon_snr_averages_over_precoder_set():
+    rng = np.random.default_rng(0)
+    h = rng.standard_normal((3, 3, 64)) + 1j * rng.standard_normal((3, 3, 64))
+    w1, w2 = np.exp(1j * rng.uniform(0, 6.3, (2, 64))) / 8
+    both = beacon_snr(h, np.stack([w1, w2]), 1., 1e-3, 2.)
+    assert np.allclose(both, (beacon_snr(h, w1, 1., 1e-3, 2.) + beacon_snr(h, w2, 1., 1e-3, 2.)) / 2)
+    assert np.allclose(beacon_snr(h, w1[None], 1., 1e-3, 2.), beacon_snr(h, w1, 1., 1e-3, 2.))
